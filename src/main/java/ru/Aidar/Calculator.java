@@ -1,9 +1,6 @@
 package ru.Aidar;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class Calculator {
@@ -37,7 +34,12 @@ public class Calculator {
         double firstNumber;
         double secondNumber;
         input = input.replaceAll("\\s+", "");
-        ArrayList<String> postfixNotation = getPostfixNotation(input);
+        ArrayList<String> postfixNotation;
+        try {
+            postfixNotation = getPostfixNotation(input);
+        } catch (EmptyStackException e) {
+            throw new IllegalArgumentException(" Wrong input, check it again, pay attention on ')'");
+        }
         Stack<Double> numberStack = new Stack<>();
         for (String str : postfixNotation) {
             if (isNumeric(str)) {
@@ -49,6 +51,9 @@ public class Calculator {
                 numberStack.push(executeSimpleOperation(firstNumber, secondNumber, str.charAt(0)));
                 System.out.println("# " + counter + " " + " " + firstNumber + " " + str + " " + secondNumber + "=" + numberStack.peek());
             }
+        }
+        if(numberStack.isEmpty()){
+            throw new IllegalArgumentException(" Wrong input, check it again : " + input);
         }
         return numberStack.pop();
     }
@@ -83,6 +88,9 @@ public class Calculator {
             if (Character.isDigit(curChar) || curChar == '.') { //add number
                 int startPosition = i;
                 while (i < length && (Character.isDigit(input.charAt(i)) || input.charAt(i) == '.')) {
+                    if(i!=startPosition && input.charAt(i) == '.' && input.charAt(i-1) == '.'){
+                        throw new IllegalArgumentException("Find multiply following dots");
+                    }
                     i++;
                 }
                 postfixNotation.add(input.substring(startPosition, i));
